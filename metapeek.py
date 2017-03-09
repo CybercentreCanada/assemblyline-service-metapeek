@@ -56,7 +56,7 @@ class MetaPeek(ServiceBase):
     SERVICE_DESCRIPTION = "This service checks submission metadata for indicators of potential malicious" \
                           " behavior (double file extenstions, ...)"
     SERVICE_ENABLED = True
-    SERVICE_REVISION = ServiceBase.parse_revision('$Id: 662a57ae65431c8c2c4cadc1fb5f9afdf2952cd1 $')
+    SERVICE_REVISION = ServiceBase.parse_revision('$Id$')
     SERVICE_STAGE = 'SECONDARY'  # run in secondary so we have more metadata
     SERVICE_VERSION = '1'
     SERVICE_CPU_CORES = 0.05
@@ -69,7 +69,7 @@ class MetaPeek(ServiceBase):
         if not request.path:
             request.result = Result()
             return
-        filename = posixpath.basename(request.task.path)
+        filename = posixpath.basename(request.path)
         request.result = self.check_file_name_anomalies(filename)
         return
 
