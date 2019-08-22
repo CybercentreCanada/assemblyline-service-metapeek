@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-""" Metadata Anomaly Detection service. 
+""" Metadata Anomaly Detection service.
 
 This service is intended to look for anomalies based on metadata only.
 It does not require fetching the actual sample.
@@ -9,15 +7,14 @@ It does not require fetching the actual sample.
 import os
 import posixpath
 import re
-from assemblyline.common.charset import remove_bidir_unicode_controls
-from assemblyline.common.charset import wrap_bidir_unicode_string
-from assemblyline.al.common.result import Result, ResultSection, SCORE
-from assemblyline.al.common.result import TAG_TYPE, TAG_WEIGHT
-from assemblyline.al.service.base import ServiceBase
+
+from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bidir_unicode_string
+from assemblyline_v4_service.common.base import ServiceBase
+from assemblyline_v4_service.common.result import Result, ResultSection
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_LAUNCHABLE_EXTENSIONS = [
-    'AS',  # Adobe ActioonScript
+    'AS',  # Adobe ActionScript
     'BAT',  # DOS/Windows batch file
     'CMD',  # Windows Command
     'COM',  # DOS Command
@@ -50,26 +47,11 @@ G_BAIT_EXTENSIONS += [file_ext[::-1] for file_ext in G_BAIT_EXTENSIONS]
 
 
 class MetaPeek(ServiceBase):
-    SERVICE_CATEGORY = "Static Analysis"
-    SERVICE_DEFAULT_CONFIG = {
-    }
-    SERVICE_DESCRIPTION = "This service checks submission metadata for indicators of potential malicious" \
-                          " behavior (double file extenstions, ...)"
-    SERVICE_ENABLED = True
-    SERVICE_REVISION = ServiceBase.parse_revision('$Id$')
-    SERVICE_STAGE = 'SECONDARY'  # run in secondary so we have more metadata
-    SERVICE_VERSION = '1'
-    SERVICE_CPU_CORES = 0.05
-    SERVICE_RAM_MB = 64
-
-    def __init__(self, cfg=None):
-        super(MetaPeek, self).__init__(cfg)
+    def __init__(self, config=None):
+        super(MetaPeek, self).__init__(config)
 
     def execute(self, request):
-        if not request.path:
-            request.result = Result()
-            return
-        filename = posixpath.basename(request.path)
+        filename = posixpath.basename(request.download_file())
         request.result = self.check_file_name_anomalies(filename)
         return
 
@@ -142,8 +124,8 @@ class MetaPeek(ServiceBase):
             as they can potentially be used.
         """
 
-        if type(filename) == type(unicode()):
-            re_obj = re.search(ur'[\u202E\u202B\u202D\u202A\u200E\u200F]',
+        if isinstance(filename, str):
+            re_obj = re.search(r'[\u202E\u202B\u202D\u202A\u200E\u200F]',
                                filename)
             if re_obj is not None and len(re_obj.group()) > 0:
                 if f_ext[1:].upper() in G_LAUNCHABLE_EXTENSIONS:
@@ -161,66 +143,50 @@ class MetaPeek(ServiceBase):
 
         file_res = Result()
 
-        fna_score = SCORE.NULL
-        if too_many_whitespaces:
-            fna_score = fna_score + SCORE.VHIGH
-        if is_double_ext:
-            fna_score = fna_score + SCORE.VHIGH
-        if has_unicode_ext_hiding_ctrls:
-            fna_score = fna_score + SCORE.VHIGH
-        if is_empty_filename:
-            fna_score = fna_score + SCORE.VHIGH
+        if too_many_whitespaces or is_double_ext or has_unicode_ext_hiding_ctrls or is_empty_filename:
+            res = ResultSection(title_text="File Name Anomalies")
 
-        if fna_score > 0:
-            res = ResultSection(fna_score, "File Name Anomalies:")
-
-            if is_double_ext:
-                res.add_line('Double file extension')
-                file_res.add_tag(TAG_TYPE['FILENAME_ANOMALIES'],
-                                 'DOUBLE_FILE_EXTENSION',
-                                 TAG_WEIGHT["NULL"], usage='IDENTIFICATION')
-                file_res.add_tag(TAG_TYPE['FILE_SUMMARY'],
-                                 'Double file extension',
-                                 TAG_WEIGHT["NULL"], usage='IDENTIFICATION')
-            if too_many_whitespaces:
-                res.add_line('File name has too many whitespaces, possibly masking its actual extension')
-                file_res.add_tag(TAG_TYPE['FILENAME_ANOMALIES'],
-                                 'TOO_MANY_WHITESPACES',
-                                 TAG_WEIGHT['NULL'], usage='IDENTIFICATION')
-                file_res.add_tag(TAG_TYPE['FILE_SUMMARY'],
-                                 'File name has too many whitespaces',
-                                 TAG_WEIGHT["NULL"], usage='IDENTIFICATION')
-            if has_unicode_ext_hiding_ctrls:
-                res.add_line('Launchable file extension is hidden using a Unicode bidirectional control')
-                file_res.add_tag(TAG_TYPE['FILENAME_ANOMALIES'],
-                                 'UNICODE_EXTENSION_HIDING',
-                                 TAG_WEIGHT['NULL'], usage='IDENTIFICATION')
-                file_res.add_tag(TAG_TYPE['FILE_SUMMARY'],
-                                 'Real file extension hidden using unicode trickery',
-                                 TAG_WEIGHT["NULL"], usage='IDENTIFICATION')
-            if is_empty_filename:
-                res.add_line('File name is empty or all whitespaces')
-                file_res.add_tag(TAG_TYPE['FILENAME_ANOMALIES'],
-                                 'FILENAME_EMPTY_OR_ALL_SPACES',
-                                 TAG_WEIGHT['NULL'], usage='IDENTIFICATION')
-                file_res.add_tag(TAG_TYPE['FILE_SUMMARY'],
-                                 'File name is empty or all whitespaces',
-                                 TAG_WEIGHT["NULL"], usage='IDENTIFICATION')
-
-                # Tag filename as it might be of interest
-            # Also add a line with "actual" file name
-            file_res.add_tag(TAG_TYPE['FILE_NAME'],
-                             filename,
-                             TAG_WEIGHT['NULL'], usage='IDENTIFICATION')
+            # Tag filename as it might be of interest
+            res.add_tag(tag_type='file.name.extracted', value=filename)
 
             # Remove Unicode controls, if any, for reporting
             fn_no_controls = ''.join(c for c in filename
-                                     if c not in [u'\u202E', u'\u202B', u'\u202D',
-                                                  u'\u202A', u'\u200E', u'\u200F'])
+                                     if c not in ['\u202E', '\u202B', '\u202D',
+                                                  '\u202A', '\u200E', '\u200F'])
 
-            res.add_line('Actual File Name: \'%s\'' %
-                         wrap_bidir_unicode_string(fn_no_controls))
+            # Also add a line with "actual" file name
+            res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
 
-            file_res.add_result(res)
+            if too_many_whitespaces:
+                sec = ResultSection(title_text="Too Many Whitespaces")
+                sec.add_line("File name has too many whitespaces, possibly masking its actual extension")
+                sec.add_tag(tag_type='file.name.anomaly', value='TOO_MANY_WHITESPACES')
+                sec.add_tag(tag_type='file.behavior', value="File name has too many whitespaces")
+                sec.set_heuristic('AL_METAPEEK_1')
+                res.add_subsection(sec)
+
+            if is_double_ext:
+                sec = ResultSection(title_text="Double File Extension")
+                sec.add_line("File name has two extensions")
+                sec.add_tag(tag_type='file.name.anomaly', value='DOUBLE_FILE_EXTENSION')
+                sec.add_tag(tag_type='file.behavior', value="Double file extension")
+                sec.set_heuristic('AL_METAPEEK_2')
+                res.add_subsection(sec)
+
+            if has_unicode_ext_hiding_ctrls:
+                sec = ResultSection(title_text="Hidden Launchable File Extension")
+                sec.add_line("Launchable file extension is hidden using a Unicode bidirectional control")
+                sec.add_tag(tag_type='file.name.anomaly', value='UNICODE_EXTENSION_HIDING')
+                sec.add_tag(tag_type='file.behavior', value="Real file extension hidden using unicode trickery")
+                sec.set_heuristic('AL_METAPEEK_3')
+                res.add_subsection(sec)
+
+            if is_empty_filename:
+                sec = ResultSection(title_text="Empty Filename")
+                sec.add_line("File name is empty or all whitespaces")
+                sec.add_tag(tag_type='file.name.anomaly', value='FILENAME_EMPTY_OR_ALL_SPACES')
+                sec.add_tag(tag_type='file.behavior', value="File name is empty or all whitespaces")
+                sec.set_heuristic('AL_METAPEEK_4')
+                res.add_subsection(sec)
 
         return file_res
