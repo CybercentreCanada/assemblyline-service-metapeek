@@ -25,26 +25,29 @@ config: {}
 submission_params: []
 
 heuristics:
-  - description: This is a Heuristic for MetaPeek.
-    filetype: pdf
-    heur_id: AL_METAPEEK_1
-    name: MetaPeek Service Heuristic 1
+  - heur_id: AL_METAPEEK_1
+    name: Too Many Whitespaces
     score: 500
-  - description: This is a Heuristic for MetaPeek.
-    filetype: pdf
-    heur_id: AL_METAPEEK_2
-    name: MetaPeek Service Heuristic 1
+    filetype: multiple
+    description: File name has too many whitespaces, possibly masking its actual extension.
+
+  - heur_id: AL_METAPEEK_2
+    name: Double File Extension
     score: 500
-  - description: This is a Heuristic for MetaPeek.
-    filetype: pdf
-    heur_id: AL_METAPEEK_3
-    name: MetaPeek Service Heuristic 1
+    filetype: multiple
+    description: File name has two extensions.
+
+  - heur_id: AL_METAPEEK_3
+    name: Hidden Launchable File Extension
     score: 500
-  - description: This is a Heuristic for MetaPeek.
-    filetype: pdf
-    heur_id: AL_METAPEEK_4
-    name: MetaPeek Service Heuristic 1
+    filetype: multiple
+    description: Launchable file extension is hidden using a Unicode bidirectional control.
+
+  - heur_id: AL_METAPEEK_4
+    name: Empty Filename
     score: 500
+    filetype: multiple
+    description: File name is empty or all whitespaces.
 
 docker_config:
   image: cccs/assemblyline-service-metapeek:latest
