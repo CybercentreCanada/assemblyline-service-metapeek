@@ -10,7 +10,7 @@ import re
 
 from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bidir_unicode_string
 from assemblyline_v4_service.common.base import ServiceBase
-from assemblyline_v4_service.common.result import Result, ResultSection
+from assemblyline_v4_service.common.result import Result, ResultSection, BODY_FORMAT
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_LAUNCHABLE_EXTENSIONS = [
@@ -158,35 +158,33 @@ class MetaPeek(ServiceBase):
             res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
 
             if too_many_whitespaces:
-                sec = ResultSection(title_text="Too Many Whitespaces")
-                sec.add_line("File name has too many whitespaces, possibly masking its actual extension")
+                sec = ResultSection(title_text="Too Many Whitespaces", body_format=BODY_FORMAT.HEURISTIC)
                 sec.add_tag(tag_type='file.name.anomaly', value='TOO_MANY_WHITESPACES')
                 sec.add_tag(tag_type='file.behavior', value="File name has too many whitespaces")
                 sec.set_heuristic('AL_METAPEEK_1')
                 res.add_subsection(sec)
 
             if is_double_ext:
-                sec = ResultSection(title_text="Double File Extension")
-                sec.add_line("File name has two extensions")
+                sec = ResultSection(title_text="Double File Extension", body_format=BODY_FORMAT.HEURISTIC)
                 sec.add_tag(tag_type='file.name.anomaly', value='DOUBLE_FILE_EXTENSION')
                 sec.add_tag(tag_type='file.behavior', value="Double file extension")
                 sec.set_heuristic('AL_METAPEEK_2')
                 res.add_subsection(sec)
 
             if has_unicode_ext_hiding_ctrls:
-                sec = ResultSection(title_text="Hidden Launchable File Extension")
-                sec.add_line("Launchable file extension is hidden using a Unicode bidirectional control")
+                sec = ResultSection(title_text="Hidden Launchable File Extension", body_format=BODY_FORMAT.HEURISTIC)
                 sec.add_tag(tag_type='file.name.anomaly', value='UNICODE_EXTENSION_HIDING')
                 sec.add_tag(tag_type='file.behavior', value="Real file extension hidden using unicode trickery")
                 sec.set_heuristic('AL_METAPEEK_3')
                 res.add_subsection(sec)
 
             if is_empty_filename:
-                sec = ResultSection(title_text="Empty Filename")
-                sec.add_line("File name is empty or all whitespaces")
+                sec = ResultSection(title_text="Empty Filename", body_format=BODY_FORMAT.HEURISTIC)
                 sec.add_tag(tag_type='file.name.anomaly', value='FILENAME_EMPTY_OR_ALL_SPACES')
                 sec.add_tag(tag_type='file.behavior', value="File name is empty or all whitespaces")
                 sec.set_heuristic('AL_METAPEEK_4')
                 res.add_subsection(sec)
+
+            file_res.add_section(res)
 
         return file_res
