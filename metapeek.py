@@ -51,7 +51,7 @@ class MetaPeek(ServiceBase):
         super(MetaPeek, self).__init__(config)
 
     def execute(self, request):
-        filename = posixpath.basename(request.download_file())
+        filename = posixpath.basename(request.file_path)
         request.result = self.check_file_name_anomalies(filename)
         return
 
