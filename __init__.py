@@ -1,1 +1,1 @@
-from metapeek import MetaPeek
+from .metapeek import MetaPeek
