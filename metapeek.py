@@ -10,36 +10,36 @@ import re
 
 from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bidir_unicode_string
 from assemblyline_v4_service.common.base import ServiceBase
-from assemblyline_v4_service.common.result import Result, ResultSection, BODY_FORMAT
+from assemblyline_v4_service.common.result import Result, ResultSection, Heuristic
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_LAUNCHABLE_EXTENSIONS = [
-    'AS',  # Adobe ActionScript
+    'AS',   # Adobe ActionScript
     'BAT',  # DOS/Windows batch file
     'CMD',  # Windows Command
     'COM',  # DOS Command
     'EXE',  # DOS/Windows executable
     'DLL',  # Windows library
     'INF',  # Windows autorun
-    'JS',  # JavaScript
+    'JS',   # JavaScript
     'LNK',  # Windows shortcut
-    'SCR'  # Windows screensaver
+    'SCR',  # Windows screensaver
 ]
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_BAIT_EXTENSIONS = [
-    'BMP',  # Bitmap image
-    'DOC',  # MS Word document
+    'BMP',   # Bitmap image
+    'DOC',   # MS Word document
     'DOCX',  # MS Word document
-    'DOT',  # MS Word template
-    'JPG',  # JPEG image
+    'DOT',   # MS Word template
+    'JPG',   # JPEG image
     'JPEG',  # JPEG image
-    'PDF',  # Acrobat PDF
-    'PNG',  # Image
-    'PPT',  # MS PowerPoint
-    'TXT',  # Plain old text doc
-    'XLS',  # MS spreadsheet
-    'ZIP'  # Compressed file
+    'PDF',   # Acrobat PDF
+    'PNG',   # Image
+    'PPT',   # MS PowerPoint
+    'TXT',   # Plain old text doc
+    'XLS',   # MS spreadsheet
+    'ZIP',   # Compressed file
 ]
 
 # Reversed extensions are used in unicode extension hiding attacks
@@ -144,10 +144,10 @@ class MetaPeek(ServiceBase):
         file_res = Result()
 
         if too_many_whitespaces or is_double_ext or has_unicode_ext_hiding_ctrls or is_empty_filename:
-            res = ResultSection(title_text="File Name Anomalies")
+            res = ResultSection(title_text="File Name Anomalies", parent=file_res)
 
             # Tag filename as it might be of interest
-            res.add_tag(tag_type='file.name.extracted', value=filename)
+            res.add_tag('file.name.extracted', filename)
 
             # Remove Unicode controls, if any, for reporting
             fn_no_controls = ''.join(c for c in filename
@@ -158,33 +158,23 @@ class MetaPeek(ServiceBase):
             res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
 
             if too_many_whitespaces:
-                sec = ResultSection(title_text="Too Many Whitespaces", body_format=BODY_FORMAT.HEURISTIC)
-                sec.add_tag(tag_type='file.name.anomaly', value='TOO_MANY_WHITESPACES')
-                sec.add_tag(tag_type='file.behavior', value="File name has too many whitespaces")
-                sec.set_heuristic('AL_METAPEEK_1')
-                res.add_subsection(sec)
+                sec = ResultSection("Too many whitespaces", parent=res, heuristic=Heuristic('AL_METAPEEK_1'))
+                sec.add_tag('file.name.anomaly', 'TOO_MANY_WHITESPACES')
+                sec.add_tag('file.behavior', "File name has too many whitespaces")
 
             if is_double_ext:
-                sec = ResultSection(title_text="Double File Extension", body_format=BODY_FORMAT.HEURISTIC)
-                sec.add_tag(tag_type='file.name.anomaly', value='DOUBLE_FILE_EXTENSION')
-                sec.add_tag(tag_type='file.behavior', value="Double file extension")
-                sec.set_heuristic('AL_METAPEEK_2')
-                res.add_subsection(sec)
+                sec = ResultSection("Double file extension", parent=res, heuristic=Heuristic('AL_METAPEEK_2'))
+                sec.add_tag('file.name.anomaly', 'DOUBLE_FILE_EXTENSION')
+                sec.add_tag('file.behavior', "Double file extension")
 
             if has_unicode_ext_hiding_ctrls:
-                sec = ResultSection(title_text="Hidden Launchable File Extension", body_format=BODY_FORMAT.HEURISTIC)
-                sec.add_tag(tag_type='file.name.anomaly', value='UNICODE_EXTENSION_HIDING')
-                sec.add_tag(tag_type='file.behavior', value="Real file extension hidden using unicode trickery")
-                sec.set_heuristic('AL_METAPEEK_3')
-                res.add_subsection(sec)
+                sec = ResultSection("Hidden launchable file extension", parent=res, heuristic=Heuristic('AL_METAPEEK_3'))
+                sec.add_tag('file.name.anomaly', 'UNICODE_EXTENSION_HIDING')
+                sec.add_tag('file.behavior', "Real file extension hidden using unicode trickery")
 
             if is_empty_filename:
-                sec = ResultSection(title_text="Empty Filename", body_format=BODY_FORMAT.HEURISTIC)
-                sec.add_tag(tag_type='file.name.anomaly', value='FILENAME_EMPTY_OR_ALL_SPACES')
-                sec.add_tag(tag_type='file.behavior', value="File name is empty or all whitespaces")
-                sec.set_heuristic('AL_METAPEEK_4')
-                res.add_subsection(sec)
-
-            file_res.add_section(res)
+                sec = ResultSection("Empty Filename", parent=res, heuristic=Heuristic('AL_METAPEEK_4'))
+                sec.add_tag('file.name.anomaly', 'FILENAME_EMPTY_OR_ALL_SPACES')
+                sec.add_tag('file.behavior', "File name is empty or all whitespaces")
 
         return file_res
