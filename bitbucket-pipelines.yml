@@ -12,7 +12,6 @@ pipelines:
       - step:
           name: Deploy to Docker Hub
           image: python:3.7
-          trigger: manual
           services: [docker]
           deployment: container
           script:
