@@ -13,7 +13,6 @@ timeout: 60
 disable_cache: false
 
 enabled: true
-install_by_default: true
 is_external: false
 licence_count: 0
 supported_platforms: [linux]
