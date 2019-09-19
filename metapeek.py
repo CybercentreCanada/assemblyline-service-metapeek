@@ -158,22 +158,22 @@ class MetaPeek(ServiceBase):
             res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
 
             if too_many_whitespaces:
-                sec = ResultSection("Too many whitespaces", parent=res, heuristic=Heuristic('AL_METAPEEK_1'))
+                sec = ResultSection("Too many whitespaces", parent=res, heuristic=Heuristic(1))
                 sec.add_tag('file.name.anomaly', 'TOO_MANY_WHITESPACES')
                 sec.add_tag('file.behavior', "File name has too many whitespaces")
 
             if is_double_ext:
-                sec = ResultSection("Double file extension", parent=res, heuristic=Heuristic('AL_METAPEEK_2'))
+                sec = ResultSection("Double file extension", parent=res, heuristic=Heuristic(2))
                 sec.add_tag('file.name.anomaly', 'DOUBLE_FILE_EXTENSION')
                 sec.add_tag('file.behavior', "Double file extension")
 
             if has_unicode_ext_hiding_ctrls:
-                sec = ResultSection("Hidden launchable file extension", parent=res, heuristic=Heuristic('AL_METAPEEK_3'))
+                sec = ResultSection("Hidden launchable file extension", parent=res, heuristic=Heuristic(3))
                 sec.add_tag('file.name.anomaly', 'UNICODE_EXTENSION_HIDING')
                 sec.add_tag('file.behavior', "Real file extension hidden using unicode trickery")
 
             if is_empty_filename:
-                sec = ResultSection("Empty Filename", parent=res, heuristic=Heuristic('AL_METAPEEK_4'))
+                sec = ResultSection("Empty Filename", parent=res, heuristic=Heuristic(4))
                 sec.add_tag('file.name.anomaly', 'FILENAME_EMPTY_OR_ALL_SPACES')
                 sec.add_tag('file.behavior', "File name is empty or all whitespaces")
 

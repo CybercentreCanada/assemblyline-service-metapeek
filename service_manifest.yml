@@ -22,25 +22,25 @@ config: {}
 submission_params: []
 
 heuristics:
-  - heur_id: AL_METAPEEK_1
+  - heur_id: 1
     name: Too Many Whitespaces
     score: 500
     filetype: multiple
     description: File name has too many whitespaces, possibly masking its actual extension.
 
-  - heur_id: AL_METAPEEK_2
+  - heur_id: 2
     name: Double File Extension
     score: 500
     filetype: multiple
     description: File name has two extensions.
 
-  - heur_id: AL_METAPEEK_3
+  - heur_id: 3
     name: Hidden Launchable File Extension
     score: 500
     filetype: multiple
     description: Launchable file extension is hidden using a Unicode bidirectional control.
 
-  - heur_id: AL_METAPEEK_4
+  - heur_id: 4
     name: Empty Filename
     score: 500
     filetype: multiple
