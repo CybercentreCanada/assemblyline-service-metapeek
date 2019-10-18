@@ -10,6 +10,7 @@ import re
 
 from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bidir_unicode_string
 from assemblyline_v4_service.common.base import ServiceBase
+from assemblyline_v4_service.common.request import ServiceRequest
 from assemblyline_v4_service.common.result import Result, ResultSection, Heuristic
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
@@ -50,8 +51,8 @@ class MetaPeek(ServiceBase):
     def __init__(self, config=None):
         super(MetaPeek, self).__init__(config)
 
-    def execute(self, request):
-        filename = posixpath.basename(request.file_path)
+    def execute(self, request: ServiceRequest):
+        filename = posixpath.basename(request.file_name)
         request.result = self.check_file_name_anomalies(filename)
         return
 
