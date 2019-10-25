@@ -48,4 +48,4 @@ heuristics:
 docker_config:
   image: cccs/assemblyline-service-metapeek:latest
   cpu_cores: 0.05
-  ram_mb: 64
+  ram_mb: 128
