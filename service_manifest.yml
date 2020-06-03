@@ -1,5 +1,5 @@
 name: MetaPeek
-version: 1
+version: $SERVICE_TAG
 description: Checks submission metadata for indicators of potential malicious behavior (double file extenstions, ...).
 
 accepts: .*
@@ -46,6 +46,6 @@ heuristics:
     description: File name is empty or all whitespaces.
 
 docker_config:
-  image: ${REGISTRY}cccs/assemblyline-service-metapeek:latest
+  image: ${REGISTRY}cccs/assemblyline-service-metapeek:$SERVICE_TAG
   cpu_cores: 0.25
   ram_mb: 256
