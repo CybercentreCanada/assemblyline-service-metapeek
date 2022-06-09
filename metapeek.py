@@ -30,6 +30,10 @@ G_LAUNCHABLE_EXTENSIONS = [
     "SCR",  # Windows screensaver
 ]
 
+# We do not want to look for double extension on LNK files
+G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT = G_LAUNCHABLE_EXTENSIONS[:]
+G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT.remove("LNK")
+
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_BAIT_EXTENSIONS = [
     "BMP",  # Bitmap image
@@ -73,12 +77,14 @@ class MetaPeek(ServiceBase):
         _, file_ext_1 = os.path.splitext(filename)
         file_ext_1 = remove_bidir_unicode_controls(file_ext_1.strip())
         # Ignore files with a '.' but nothing after
-        if file_ext_min < len(file_ext_1) <= file_ext_max + 1:
+        if (
+            file_ext_min < len(file_ext_1) <= file_ext_max + 1
+            and file_ext_1[1:].upper() in G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT
+        ):
             _, file_ext_2 = os.path.splitext(filename[: len(filename) - len(file_ext_1)])
             file_ext_2 = remove_bidir_unicode_controls(file_ext_2.strip())
-            if file_ext_min < len(file_ext_2) <= file_ext_max + 1:
-                if file_ext_1[1:].upper() in G_LAUNCHABLE_EXTENSIONS and file_ext_2[1:].upper() in G_BAIT_EXTENSIONS:
-                    return True, file_ext_1
+            if file_ext_min < len(file_ext_2) <= file_ext_max + 1 and file_ext_2[1:].upper() in G_BAIT_EXTENSIONS:
+                return True, file_ext_1
 
         return False, file_ext_1
 
