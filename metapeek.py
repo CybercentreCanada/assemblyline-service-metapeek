@@ -22,17 +22,19 @@ G_LAUNCHABLE_EXTENSIONS = [
     "BAT",  # DOS/Windows batch file
     "CMD",  # Windows Command
     "COM",  # DOS Command
-    "EXE",  # DOS/Windows executable
     "DLL",  # Windows library
+    "EXE",  # DOS/Windows executable
     "INF",  # Windows autorun
     "JS",  # JavaScript
     "LNK",  # Windows shortcut
     "SCR",  # Windows screensaver
+    "URL",  # Windows URL Shortcut
 ]
 
 # We do not want to look for double extension on LNK files
 G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT = G_LAUNCHABLE_EXTENSIONS[:]
 G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT.remove("LNK")
+G_LAUNCHABLE_EXTENSIONS_DOUBLE_EXT.remove("URL")
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_BAIT_EXTENSIONS = [
