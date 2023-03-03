@@ -47,5 +47,5 @@ heuristics:
 
 docker_config:
   image: ${REGISTRY}cccs/assemblyline-service-metapeek:$SERVICE_TAG
-  cpu_cores: 0.25
+  cpu_cores: 0.4
   ram_mb: 256
