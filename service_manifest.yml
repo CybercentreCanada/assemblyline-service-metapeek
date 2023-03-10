@@ -24,25 +24,25 @@ heuristics:
   - heur_id: 1
     name: Too Many Whitespaces
     score: 500
-    filetype: '*'
+    filetype: '.*'
     description: File name has too many whitespaces, possibly masking its actual extension.
 
   - heur_id: 2
     name: Double File Extension
     score: 500
-    filetype: '*'
+    filetype: '.*'
     description: File name has two extensions.
 
   - heur_id: 3
     name: Hidden Launchable File Extension
     score: 500
-    filetype: '*'
+    filetype: '.*'
     description: Launchable file extension is hidden using a Unicode bidirectional control.
 
   - heur_id: 4
     name: Empty Filename
     score: 500
-    filetype: '*'
+    filetype: '.*'
     description: File name is empty or all whitespaces.
 
 docker_config:
