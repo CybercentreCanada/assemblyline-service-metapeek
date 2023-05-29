@@ -8,10 +8,7 @@ import os
 import posixpath
 import re
 
-from assemblyline.common.str_utils import (
-    remove_bidir_unicode_controls,
-    wrap_bidir_unicode_string,
-)
+from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bidir_unicode_string
 from assemblyline_v4_service.common.base import ServiceBase
 from assemblyline_v4_service.common.request import ServiceRequest
 from assemblyline_v4_service.common.result import Heuristic, Result, ResultSection
