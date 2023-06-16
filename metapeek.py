@@ -52,14 +52,70 @@ G_BAIT_EXTENSIONS = [
 # Reversed extensions are used in unicode extension hiding attacks
 G_BAIT_EXTENSIONS += [file_ext[::-1] for file_ext in G_BAIT_EXTENSIONS]
 
+PHISHING_CHAR = [
+    # b"\xe2\x84\xa2".decode(), # ™
+    b"\xe2\x8f\xad".decode(),  # ⏭
+    b"\xe2\x8f\xae".decode(),  # ⏮
+    # b"\xe2\x94\x80".decode(), # ─
+    b"\xe2\x96\xb6".decode(),  # ▶️
+    b"\xe2\x98\x8e".decode(),  # ☎
+    b"\xe2\x99\xab".decode(),  # ♫
+    b"\xf0\x9f\x8e\xb6".decode(),  # 🎶
+    b"\xf0\x9f\x93\x83".decode(),  # 📃
+    b"\xf0\x9f\x93\x84".decode(),  # 📄
+    b"\xf0\x9f\x93\x8c".decode(),  # 📌
+    b"\xf0\x9f\x93\x9e".decode(),  # 📞
+    b"\xf0\x9f\x93\xa0".decode(),  # 📠
+    b"\xf0\x9f\x93\xa7".decode(),  # 📧
+    b"\xf0\x9f\x93\xa8".decode(),  # 📨
+    b"\xf0\x9f\x93\xa9".decode(),  # 📩
+    b"\xf0\x9f\x93\xaa".decode(),  # 📪
+    b"\xf0\x9f\x93\xab".decode(),  # 📫
+    b"\xf0\x9f\x93\xac".decode(),  # 📬
+    b"\xf0\x9f\x93\xad".decode(),  # 📭
+    b"\xf0\x9f\x94\x87".decode(),  # 🔇
+    b"\xf0\x9f\x94\x88".decode(),  # 🔈
+    b"\xf0\x9f\x94\x89".decode(),  # 🔉
+    b"\xf0\x9f\x94\x8a".decode(),  # 🔊
+    b"\xf0\x9f\x94\x8f".decode(),  # 🔏
+    b"\xf0\x9f\x94\x90".decode(),  # 🔐
+    b"\xf0\x9f\x94\x91".decode(),  # 🔑
+    b"\xf0\x9f\x94\x92".decode(),  # 🔒
+    b"\xf0\x9f\x94\x93".decode(),  # 🔓
+    b"\xf0\x9f\x94\x94".decode(),  # 🔔
+    b"\xf0\x9f\x94\x95".decode(),  # 🔕
+    b"\xf0\x9f\x94\x96".decode(),  # 🔖
+    b"\xf0\x9f\x95\xa8".decode(),  # 🕨
+    b"\xf0\x9f\x95\xa9".decode(),  # 🕩
+    b"\xf0\x9f\x95\xaa".decode(),  # 🕪
+    b"\xf0\x9f\x95\xab".decode(),  # 🕫
+    b"\xf0\x9f\x95\xac".decode(),  # 🕬
+    b"\xf0\x9f\x95\xad".decode(),  # 🕭
+    b"\xf0\x9f\x95\xbb".decode(),  # 🕻
+    b"\xf0\x9f\x95\xbc".decode(),  # 🕼
+    b"\xf0\x9f\x95\xbd".decode(),  # 🕽
+    b"\xf0\x9f\x95\xbe".decode(),  # 🕾
+    b"\xf0\x9f\x95\xbf".decode(),  # 🕿
+    b"\xf0\x9f\x96\x80".decode(),  # 🖀
+    b"\xf0\x9f\x96\x81".decode(),  # 🖁
+    b"\xf0\x9f\x96\x82".decode(),  # 🖂
+    b"\xf0\x9f\x96\x83".decode(),  # 🖃
+    b"\xf0\x9f\x96\x84".decode(),  # 🖄
+    b"\xf0\x9f\x96\x85".decode(),  # 🖅
+    b"\xf0\x9f\x96\x86".decode(),  # 🖆
+    b"\xf0\x9f\x96\xa8".decode(),  # 🖨
+    b"\xf0\x9f\x9b\x8d".decode(),  # 🛍️
+]
+
+BIDIR_CTRLS = ["\u202E", "\u202B", "\u202D", "\u202A", "\u200E", "\u200F"]
+
 
 class MetaPeek(ServiceBase):
     def __init__(self, config=None):
         super(MetaPeek, self).__init__(config)
 
     def execute(self, request: ServiceRequest):
-        filename = posixpath.basename(request.file_name)
-        request.result = self.check_file_name_anomalies(filename)
+        request.result = self.check_file_name_anomalies(request)
         return
 
     @staticmethod
@@ -141,26 +197,32 @@ class MetaPeek(ServiceBase):
 
         return False
 
-    def check_file_name_anomalies(self, filename):
+    def check_file_name_anomalies(self, request: ServiceRequest):
         """Filename anomalies detection"""
+        filename = posixpath.basename(request.file_name)
 
         is_double_ext, f_ext = self.fna_check_double_extension(filename)
         is_empty_filename = self.fna_check_empty_filename(filename, f_ext)
         too_many_whitespaces = self.fna_check_filename_ws(filename, f_ext)
         has_unicode_ext_hiding_ctrls = self.fna_check_unicode_bidir_ctrls(filename, f_ext)
+        phishing_char_html = request.file_type == "code/html" and any(c in filename for c in PHISHING_CHAR)
 
         file_res = Result()
 
-        if too_many_whitespaces or is_double_ext or has_unicode_ext_hiding_ctrls or is_empty_filename:
+        if (
+            too_many_whitespaces
+            or is_double_ext
+            or has_unicode_ext_hiding_ctrls
+            or is_empty_filename
+            or phishing_char_html
+        ):
             res = ResultSection(title_text="File Name Anomalies", parent=file_res)
 
             # Tag filename as it might be of interest
             res.add_tag("file.name.extracted", filename)
 
             # Remove Unicode controls, if any, for reporting
-            fn_no_controls = "".join(
-                c for c in filename if c not in ["\u202E", "\u202B", "\u202D", "\u202A", "\u200E", "\u200F"]
-            )
+            fn_no_controls = "".join(c for c in filename if c not in BIDIR_CTRLS)
 
             # Also add a line with "actual" file name
             res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
@@ -184,5 +246,9 @@ class MetaPeek(ServiceBase):
                 sec = ResultSection("Empty Filename", parent=res, heuristic=Heuristic(4))
                 sec.add_tag("file.name.anomaly", "FILENAME_EMPTY_OR_ALL_SPACES")
                 sec.add_tag("file.behavior", "File name is empty or all whitespaces")
+
+            if phishing_char_html:
+                sec = ResultSection("Phishing Character in HTML filename", parent=res, heuristic=Heuristic(5))
+                sec.add_tag("file.name.anomaly", "PHISHING_CHAR_HTML")
 
         return file_res
