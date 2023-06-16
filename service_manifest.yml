@@ -45,6 +45,13 @@ heuristics:
     filetype: '.*'
     description: File name is empty or all whitespaces.
 
+  - heur_id: 5
+    name: Phishing character in html file name
+    score: 500
+    filetype: 'code/html'
+    description: >-
+      Some characters are used to make the file name prettier to increase the chances of clicks, like a 🎶 for a fake voicemail message.
+
 docker_config:
   image: ${REGISTRY}cccs/assemblyline-service-metapeek:$SERVICE_TAG
   cpu_cores: 0.4

@@ -1,0 +1,2 @@
+pytest
+assemblyline-service-utilities
