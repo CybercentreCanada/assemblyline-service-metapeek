@@ -12,6 +12,7 @@ from assemblyline.common.str_utils import remove_bidir_unicode_controls, wrap_bi
 from assemblyline_v4_service.common.base import ServiceBase
 from assemblyline_v4_service.common.request import ServiceRequest
 from assemblyline_v4_service.common.result import Heuristic, Result, ResultSection
+from bidi.algorithm import get_display
 
 # This list is incomplete. Feel free to add entries. Must be uppercase
 G_LAUNCHABLE_EXTENSIONS = [
@@ -107,7 +108,11 @@ PHISHING_CHAR = [
     b"\xf0\x9f\x9b\x8d".decode(),  # 🛍️
 ]
 
-BIDIR_CTRLS = ["\u202E", "\u202B", "\u202D", "\u202A", "\u200E", "\u200F"]
+RTL_CTRLS = ["\u202E", "\u202B", "\u200F"]
+LTR_CTRLS = ["\u202D", "\u202A", "\u200E"]
+POP_CTRLS = ["\u202C"]
+
+BIDIR_CTRLS = RTL_CTRLS + LTR_CTRLS + POP_CTRLS
 
 
 class MetaPeek(ServiceBase):
@@ -187,15 +192,21 @@ class MetaPeek(ServiceBase):
         executible extension of a file. Although not used before in
         malware, 0x200E (LTR Mark) and 0x200F (RTL Mark) are also checked
         as they can potentially be used.
+        Samples can be found using:
+        0x202B: https://www.virustotal.com/gui/search/name%253A%25E2%2580%25AB*/files
+        0x202E: https://www.virustotal.com/gui/search/name%253A%25E2%2580%25AE*/files
         """
 
-        if isinstance(filename, str):
-            re_obj = re.search(r"[\u202E\u202B\u202D\u202A\u200E\u200F]", filename)
-            if re_obj is not None and len(re_obj.group()) > 0:
-                if f_ext[1:].upper() in G_LAUNCHABLE_EXTENSIONS:
-                    return True
+        if not isinstance(filename, str):
+            return False
 
-        return False
+        if not any(c in filename for c in BIDIR_CTRLS):
+            return False
+
+        _, f_ext_display = os.path.splitext(get_display(filename))
+        f_ext_display = remove_bidir_unicode_controls(f_ext_display)
+
+        return f_ext_display and 3 <= len(f_ext_display) <= 5 and f_ext != f_ext_display
 
     def check_file_name_anomalies(self, request: ServiceRequest):
         """Filename anomalies detection"""
@@ -222,7 +233,7 @@ class MetaPeek(ServiceBase):
             res.add_tag("file.name.extracted", filename)
 
             # Remove Unicode controls, if any, for reporting
-            fn_no_controls = "".join(c for c in filename if c not in BIDIR_CTRLS)
+            fn_no_controls = remove_bidir_unicode_controls(filename)
 
             # Also add a line with "actual" file name
             res.add_line(f"Actual file name: {wrap_bidir_unicode_string(fn_no_controls)}")
