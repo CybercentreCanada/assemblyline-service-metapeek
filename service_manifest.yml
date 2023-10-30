@@ -3,7 +3,7 @@ version: $SERVICE_TAG
 description: Checks submission metadata for indicators of potential malicious behavior (double file extenstions, ...).
 
 accepts: .*
-rejects: empty|metadata/.*
+rejects: empty|metadata/.*|uri/.*
 
 stage: SECONDARY
 category: Static Analysis
