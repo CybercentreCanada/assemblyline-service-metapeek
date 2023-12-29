@@ -203,6 +203,14 @@ class MetaPeek(ServiceBase):
         if not any(c in filename for c in BIDIR_CTRLS):
             return False
 
+        # get_display does not handle Explicit Directional Isolates, so we'll replace them.
+        filename = (
+            filename.replace("\u2066", "\u202A")  # Replace LRI with LRE
+            .replace("\u2067", "\u202B")  # Replace RLI with RLE
+            .replace("\u2068", "")  # Replace FSI with nothing?
+            .replace("\u2069", "\u202C")  # Replace PDI with PDF
+        )
+
         _, f_ext_display = os.path.splitext(get_display(filename))
         f_ext_display = remove_bidir_unicode_controls(f_ext_display)
 
