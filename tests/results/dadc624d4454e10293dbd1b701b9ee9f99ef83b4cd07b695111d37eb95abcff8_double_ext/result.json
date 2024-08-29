@@ -1,0 +1,143 @@
+{
+  "extra": {
+    "drop_file": false,
+    "score": 1000,
+    "sections": [
+      {
+        "auto_collapse": false,
+        "body": "Actual file name: Resume (Final Final).word                                                              .exe",
+        "body_config": {},
+        "body_format": "TEXT",
+        "classification": "TLP:C",
+        "depth": 0,
+        "heuristic": null,
+        "promote_to": null,
+        "tags": {
+          "file": {
+            "name": {
+              "extracted": [
+                "Resume (Final Final).word                                                              .exe"
+              ]
+            }
+          }
+        },
+        "title_text": "File Name Anomalies",
+        "zeroize_on_tag_safe": false
+      },
+      {
+        "auto_collapse": false,
+        "body": null,
+        "body_config": {},
+        "body_format": "TEXT",
+        "classification": "TLP:C",
+        "depth": 1,
+        "heuristic": {
+          "attack_ids": [],
+          "frequency": 1,
+          "heur_id": 1,
+          "score": 500,
+          "score_map": {},
+          "signatures": {}
+        },
+        "promote_to": null,
+        "tags": {
+          "file": {
+            "behavior": [
+              "File name has too many whitespaces"
+            ],
+            "name": {
+              "anomaly": [
+                "TOO_MANY_WHITESPACES"
+              ]
+            }
+          }
+        },
+        "title_text": "Too many whitespaces",
+        "zeroize_on_tag_safe": false
+      },
+      {
+        "auto_collapse": false,
+        "body": null,
+        "body_config": {},
+        "body_format": "TEXT",
+        "classification": "TLP:C",
+        "depth": 1,
+        "heuristic": {
+          "attack_ids": [],
+          "frequency": 1,
+          "heur_id": 2,
+          "score": 500,
+          "score_map": {},
+          "signatures": {}
+        },
+        "promote_to": null,
+        "tags": {
+          "file": {
+            "behavior": [
+              "Double file extension"
+            ],
+            "name": {
+              "anomaly": [
+                "DOUBLE_FILE_EXTENSION"
+              ]
+            }
+          }
+        },
+        "title_text": "Double file extension",
+        "zeroize_on_tag_safe": false
+      }
+    ]
+  },
+  "files": {
+    "extracted": [],
+    "supplementary": []
+  },
+  "results": {
+    "heuristics": [
+      {
+        "attack_ids": [],
+        "heur_id": 1,
+        "signatures": []
+      },
+      {
+        "attack_ids": [],
+        "heur_id": 2,
+        "signatures": []
+      }
+    ],
+    "tags": {
+      "file.behavior": [
+        {
+          "heur_id": 2,
+          "signatures": [],
+          "value": "Double file extension"
+        },
+        {
+          "heur_id": 1,
+          "signatures": [],
+          "value": "File name has too many whitespaces"
+        }
+      ],
+      "file.name.anomaly": [
+        {
+          "heur_id": 2,
+          "signatures": [],
+          "value": "DOUBLE_FILE_EXTENSION"
+        },
+        {
+          "heur_id": 1,
+          "signatures": [],
+          "value": "TOO_MANY_WHITESPACES"
+        }
+      ],
+      "file.name.extracted": [
+        {
+          "heur_id": null,
+          "signatures": [],
+          "value": "Resume (Final Final).word                                                              .exe"
+        }
+      ]
+    },
+    "temp_submission_data": {}
+  }
+}

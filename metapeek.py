@@ -40,13 +40,18 @@ G_BAIT_EXTENSIONS = [
     "DOC",  # MS Word document
     "DOCX",  # MS Word document
     "DOT",  # MS Word template
+    "EXCEL",  # MS spreadsheet
     "JPG",  # JPEG image
     "JPEG",  # JPEG image
     "PDF",  # Acrobat PDF
     "PNG",  # Image
     "PPT",  # MS PowerPoint
+    "PPTX",  # MS PowerPoint
+    "TEXT",  # Plain old text doc
     "TXT",  # Plain old text doc
+    "WORD",  # MS Word document
     "XLS",  # MS spreadsheet
+    "XLSX",  # MS spreadsheet
     "ZIP",  # Compressed file
 ]
 
