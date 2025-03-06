@@ -21,6 +21,7 @@ timeout: 60
 # is the service enabled by default
 enabled: true
 privileged: true
+disable_cache: true
 
 heuristics:
   - heur_id: 1
