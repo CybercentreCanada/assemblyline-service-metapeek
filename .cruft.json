@@ -1,6 +1,6 @@
 {
   "template": "git@github.com:CybercentreCanada/assemblyline-service-template.git",
-  "commit": "99becf8ed2990a4063a5bb1f8ce878824a5a1a7b",
+  "commit": "fb7207484332b978cc409dfc9b9c672335a8cc71",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -8,7 +8,7 @@
       "__svc_name": "metapeek",
       "__repository": "assemblyline-service-metapeek",
       "__pkg_name": "metapeek",
-      "class_name": "Metapeek",
+      "class_name": "MetaPeek",
       "short_description": "This Assemblyline service checks the metadata of the submitted file to look for anomalies (name, extension, etc).",
       "short_description_fr": "Ce service d'Assemblyline vérifie les métadonnées du fichier soumis à la recherche d'anomalies (nom, extension, etc.).",
       "stage": "SECONDARY",
@@ -16,7 +16,12 @@
       "org_name_full": "CybercentreCanada",
       "org_name_short": "cccs",
       "license": "mit",
-      "_template": "git@github.com:CybercentreCanada/assemblyline-service-template.git"
+      "_extensions": [
+        "local_extensions.github_maintainer.Ext"
+      ],
+      "_template": "git@github.com:CybercentreCanada/assemblyline-service-template.git",
+      "_commit": "fb7207484332b978cc409dfc9b9c672335a8cc71",
+      "_github_maintainer": "gdesmar"
     }
   },
   "directory": null
